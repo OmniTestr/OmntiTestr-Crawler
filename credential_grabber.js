@@ -27,7 +27,7 @@ if (args.length == 5) {
 	var allCookies = {};
 	if(data != "")
 		allCookies = JSON.parse(data);
-	if (allCookies[config.url] == undefined) {
+	if (allCookies[config.url] == undefined && config.auth && config.auth.login && (config.auth.registration || config.auth.accounts)) {
 		// No cookies have been stored for this config, need to fetch them
 		var casper = require('casper').create({
 			pageSettings: {
@@ -73,7 +73,7 @@ if (args.length == 5) {
 			});
 
 			// casper.then(function() {
-			// 	this.capture('register.png');
+			// 	this.capture('crawler_images/register.png');
 			// });
 		}
 
@@ -94,7 +94,7 @@ if (args.length == 5) {
 		});
 
 		casper.then(function() {
-			// this.capture('login.png');
+			// this.capture('crawler_images/login.png');
 
 			// Store cookies after login
 			allCookies[config.url] = phantom.cookies;

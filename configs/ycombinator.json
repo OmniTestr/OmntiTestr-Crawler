@@ -1,1 +1,13 @@
-{"url":"https://news.ycombinator.com/","auth":{"login":"https://news.ycombinator.com/login","registration":"https://news.ycombinator.com/login","accounts":[{"login":"testaccount3","password":"cK7RBR9w79zACKb94L8H"}]}}
+{
+	"url": "https://news.ycombinator.com/",
+	"auth": {
+		"login": "https://news.ycombinator.com/login", 
+		"registration": "https://news.ycombinator.com/login",
+		"accounts": [
+			{
+				"login": "testaccount3",
+				"password": "cK7RBR9w79zACKb94L8H"
+			}
+		]
+	}
+}

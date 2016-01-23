@@ -5,6 +5,8 @@ const escapeStringRegexp = require('escape-string-regexp');
 var linkscrape = require('linkscrape');
 var fs = require('fs');
 var parseDomain = require("parse-domain");
+var path = require('path');
+var parse = require('url-parse');
 
 if(process.argc < 3) {
 	throw new Error("You must pass a config as the first argument.");
@@ -23,12 +25,14 @@ var domain = parsed_domain.domain + '.' + parsed_domain.tld;
 // Start url is at depth 0
 // Farthest out url has a depth of max_depth
 var max_depth = 2;
-var output_file_name = 'output.json';
+var max_links = 20;
 /////
 
+var output_file_name = 'outputs/' + path.parse(config_path).name + '.json';
 var url_queue = [{ url: config.url, depth: 0 }];
 var resources = {};
 var visited_urls = {};
+var n = 0;
 
 getCookies(config_path, function(error, cookies) {
 	if (error) throw error;
@@ -46,11 +50,11 @@ getCookies(config_path, function(error, cookies) {
 });
 
 function crawlUrls(cookies, callback) {
-	if(url_queue.length > 0) {
+	if(url_queue.length > 0 && n < max_links) {
 		var url_object = url_queue.shift();
+		n++;
 		var url = url_object.url;
 		var depth = url_object.depth;
-		console.log('Crawling: ' + url + ' at depth: ' + depth + ' (' + url_queue.length + ' links left in queue)');
 		getResources(url, cookies, function(error, data) {
 			if (error) throw error;
 			var links = [];
@@ -68,6 +72,10 @@ function crawlUrls(cookies, callback) {
 					if(resources[resource.url] == undefined)
 						resources[resource.url] = {};
 					resources[resource.url].content_type = resource.content_type;
+					var parsed_url = parse(resource.url, true);
+					resources[resource.url].protocol = parsed_url.protocol;
+					resources[resource.url].query = parsed_url.query;
+					resources[resource.url].hash = parsed_url.hash;
 					if (resources[resource.url][resource.method] == undefined)
 						resources[resource.url][resource.method] = [];
 					resources[resource.url][resource.method].push(url);
@@ -80,7 +88,7 @@ function crawlUrls(cookies, callback) {
 						link = link.substring(0, link.length - 1);
 					// If the link is not in the url_data, it has not been visited
 					// Also enacts a depth limit here
-					if(visited_urls[link] != true && !containsKeyPair(url_queue, 'url', link) && depth < max_depth) {
+					if(visited_urls[link] != true && !containsKeyPair(url_queue, 'url', link) && depth < max_depth && (n + url_queue.length) < max_links) {
 						url_queue.push({
 							url: link, 
 							depth: depth + 1 
@@ -88,6 +96,7 @@ function crawlUrls(cookies, callback) {
 					}
 				}
 
+				console.log('Crawled: ' + url + ' at depth: ' + depth + ' (' + url_queue.length + ' links left in queue, ' + n + ' links parsed)');
 				crawlUrls(cookies, callback);
 			});
 		});
@@ -98,11 +107,15 @@ function crawlUrls(cookies, callback) {
 
 function getResources(url, cookies, callback) {
 	const spawn = child_process.spawn;
-	const resource_gather = spawn('phantomjs', ['resource_gather.js', url, JSON.stringify(cookies)]);
+	var args = ['--ssl-protocol=any', 'resource_gather.js', url];
+	if (cookies)
+		args.push(JSON.stringify(cookies));
+	const resource_gather = spawn('phantomjs', args);
 	var rg_output = "";
 
 	resource_gather.stdout.on('data', (data) => {
-		rg_output += "" + data;
+		if (!("" + data).match(/\*\*\* WARNING/))
+			rg_output += "" + data;
 	});
 
 	resource_gather.on('close', (code) => {
