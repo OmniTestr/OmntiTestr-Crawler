@@ -7,42 +7,51 @@ var fs = require('fs');
 var parseDomain = require("parse-domain");
 
 if(process.argc < 3) {
-	throw new Error("You must pass a start URL as the first argument.");
+	throw new Error("You must pass a config as the first argument.");
 }
-var start_url = process.argv[2];
-var parsed_domain = parseDomain(start_url);
-if(parsed_domain == null) {
-	throw new Error("Unable to parse a domain from what you passed in as the start url ('" + start_url + "')");
+var config_path = process.argv[2];
+var config_data = fs.readFileSync(config_path);
+var config = JSON.parse(config_data);
+
+var parsed_domain = parseDomain(config.url);
+if (parsed_domain == null) {
+	throw new Error("Unable to parse a domain from what you passed in as the start url ('" + config.url + "')");
 }
 var domain = parsed_domain.domain + '.' + parsed_domain.tld;
 
 ///// CONFIG
 // Start url is at depth 0
 // Farthest out url has a depth of max_depth
-var max_depth = 0;
+var max_depth = 2;
 var output_file_name = 'output.json';
 /////
 
-var url_queue = [{ url: start_url, depth: 0 }];
+var url_queue = [{ url: config.url, depth: 0 }];
 var resources = {};
 var visited_urls = {};
 
-crawlUrls(function(error) {
+getCookies(config_path, function(error, cookies) {
 	if (error) throw error;
-	var data = JSON.stringify(resources, undefined, 4);
-	fs.writeFile(output_file_name, data, function(error) {
+	console.log(cookies);
+	console.log('Cookies Loaded.');
+
+	crawlUrls(cookies, function(error) {
 		if (error) throw error;
-		console.log("Wrote to: " + output_file_name);
-	}); 
+		var data = JSON.stringify(resources, undefined, 4);
+		fs.writeFile(output_file_name, data, function(error) {
+			if (error) throw error;
+			console.log("Wrote to: " + output_file_name + '.');
+		}); 
+	});
 });
 
-function crawlUrls(callback) {
+function crawlUrls(cookies, callback) {
 	if(url_queue.length > 0) {
 		var url_object = url_queue.shift();
 		var url = url_object.url;
 		var depth = url_object.depth;
-		console.log('Crawling: ' + url + ' at depth: ' + depth + ' (' + url_queue.length + ' links in queue)');
-		getResources(url, function(error, data) {
+		console.log('Crawling: ' + url + ' at depth: ' + depth + ' (' + url_queue.length + ' links left in queue)');
+		getResources(url, cookies, function(error, data) {
 			if (error) throw error;
 			var links = [];
 			linkscrape(url, data.html, function(link_data, $) {
@@ -79,7 +88,7 @@ function crawlUrls(callback) {
 					}
 				}
 
-				crawlUrls(callback);
+				crawlUrls(cookies, callback);
 			});
 		});
 	} else {
@@ -87,9 +96,9 @@ function crawlUrls(callback) {
 	}
 }
 
-function getResources(url, callback) {
+function getResources(url, cookies, callback) {
 	const spawn = child_process.spawn;
-	const resource_gather = spawn('phantomjs', ['resource_gather.js', url]);
+	const resource_gather = spawn('phantomjs', ['resource_gather.js', url, JSON.stringify(cookies)]);
 	var rg_output = "";
 
 	resource_gather.stdout.on('data', (data) => {
@@ -112,6 +121,26 @@ function getResources(url, callback) {
 			callback(null, rg_output_parsed);
 		} else {
 			callback(new Error("Resource gather error"));
+		}
+	});
+}
+
+function getCookies(config_path, callback) {
+	const spawn = child_process.spawn;
+	const cookie_fetch = spawn('casperjs', ['credential_grabber.js', config_path]);
+	var cookie_output = "";
+
+	cookie_fetch.stdout.on('data', (data) => {
+		cookie_output += "" + data;
+	});
+
+	cookie_fetch.on('close', (code) => {
+		if(code == 0) {
+			var cookie_output_parsed = JSON.parse(cookie_output);
+			callback(null, cookie_output_parsed.cookies);
+		} else {
+			console.error(cookie_output);
+			callback(new Error("Cookie fetching error, code: " + code));
 		}
 	});
 }
