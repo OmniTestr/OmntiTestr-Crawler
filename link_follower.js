@@ -90,7 +90,7 @@ function crawlUrls(callback) {
 
 function getResources(url, callback) {
 	const spawn = child_process.spawn;
-	const resource_gather = spawn('phantomjs', ['scripts/resource_gather.js', url]);
+	const resource_gather = spawn('phantomjs', ['resource_gather.js', url]);
 	var rg_output = "";
 
 	resource_gather.stdout.on('data', (data) => {
