@@ -4,16 +4,28 @@ var child_process = require('child_process');
 const escapeStringRegexp = require('escape-string-regexp');
 var linkscrape = require('linkscrape');
 var fs = require('fs');
+var parseDomain = require("parse-domain");
 
-var output_file_name = 'output.json';
-var start_url = 'http://live.pennapps.com'
-var domain = 'pennapps.com';
-var url_queue = [{ url: start_url, depth: 0 }];
-var resources = {};
-var visited_urls = {};
+if(process.argc < 3) {
+	throw new Error("You must pass a start URL as the first argument.");
+}
+var start_url = process.argv[2];
+var parsed_domain = parseDomain(start_url);
+if(parsed_domain == null) {
+	throw new Error("Unable to parse a domain from what you passed in as the start url ('" + start_url + "')");
+}
+var domain = parsed_domain.domain + '.' + parsed_domain.tld;
+
+///// CONFIG
 // Start url is at depth 0
 // Farthest out url has a depth of max_depth
 var max_depth = 1;
+var output_file_name = 'output.json';
+/////
+
+var url_queue = [{ url: start_url, depth: 0 }];
+var resources = {};
+var visited_urls = {};
 
 crawlUrls(function(error) {
 	if (error) throw error;
