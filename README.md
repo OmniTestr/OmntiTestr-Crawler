@@ -6,8 +6,8 @@ Crawls a given webpage using a depth-limited search to create an output of what 
 
 ## Installation
 Install PhantomJS: http://phantomjs.org/download.html
-
-Install the node modules:
+Install CasperJS: http://docs.casperjs.org/en/latest/installation.html
+Install node modules:
 ```node
 npm install
 ```
