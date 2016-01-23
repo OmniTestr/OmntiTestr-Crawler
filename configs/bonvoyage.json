@@ -1,0 +1,15 @@
+{
+    "url": "http://peacecorps.projectdelta.io/",
+    "auth": {
+        "login": "http://peacecorps.projectdelta.io/login",
+        "registration": "http://peacecorps.projectdelta.io/register",
+        "accounts": [
+            {
+                "name": "test863904",
+                "password": "b8}n4$b1(O2$",
+                "email": "test861526@gmail.com",
+                "phone": "8430100806"
+            }
+        ]
+    }
+}

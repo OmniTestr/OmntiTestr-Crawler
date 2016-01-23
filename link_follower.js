@@ -19,7 +19,7 @@ var domain = parsed_domain.domain + '.' + parsed_domain.tld;
 ///// CONFIG
 // Start url is at depth 0
 // Farthest out url has a depth of max_depth
-var max_depth = 1;
+var max_depth = 0;
 var output_file_name = 'output.json';
 /////
 
@@ -37,12 +37,11 @@ crawlUrls(function(error) {
 });
 
 function crawlUrls(callback) {
-	console.log(url_queue);
 	if(url_queue.length > 0) {
 		var url_object = url_queue.shift();
 		var url = url_object.url;
 		var depth = url_object.depth;
-		console.log('Crawling: ' + url + ' at depth: ' + depth);
+		console.log('Crawling: ' + url + ' at depth: ' + depth + ' (' + url_queue.length + ' links in queue)');
 		getResources(url, function(error, data) {
 			if (error) throw error;
 			var links = [];

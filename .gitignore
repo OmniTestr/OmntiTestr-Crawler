@@ -33,3 +33,5 @@ node_modules
 .node_repl_history
 
 output.json
+login_cookies.json
+*.png

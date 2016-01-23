@@ -2,7 +2,7 @@
  * Opens a URL (passed as the first argument) and gathers 
  * data on all of the network requests made.
  * 
- * phantomjs resource_gather.js http://live.pennapps.com
+ * Usage: phantomjs resource_gather.js http://live.pennapps.com
  */
 
 var page = require('webpage').create();
