@@ -2,12 +2,16 @@
 
 Crawls a given webpage using a depth-limited search to create an output of what network calls are made on each webpage from a given start URL.
 
+This crawler can handle authenticated websites and is capable of creating new logins for testing.
+
 ![Example Output](https://raw.githubusercontent.com/OmniTestr/OmntiTestr-Crawler/master/demo.jpg)
 
 ## Installation
-Install PhantomJS: http://phantomjs.org/download.html
+Install PhantomJS 1.x: https://code.google.com/p/phantomjs/downloads/list
 
-Install the node modules:
+Install CasperJS: http://docs.casperjs.org/en/latest/installation.html
+
+Install node modules:
 ```node
 npm install
 ```
