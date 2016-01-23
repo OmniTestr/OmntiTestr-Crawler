@@ -2,6 +2,8 @@
 
 Crawls a given webpage using a depth-limited search to create an output of what network calls are made on each webpage from a given start URL.
 
+This crawler can handle authenticated websites and is capable of creating new logins for testing.
+
 ![Example Output](https://raw.githubusercontent.com/OmniTestr/OmntiTestr-Crawler/master/demo.jpg)
 
 ## Installation
