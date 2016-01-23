@@ -7,7 +7,7 @@ This crawler can handle authenticated websites and is capable of creating new lo
 ![Example Output](https://raw.githubusercontent.com/OmniTestr/OmntiTestr-Crawler/master/demo.jpg)
 
 ## Installation
-Install PhantomJS: http://phantomjs.org/download.html
+Install PhantomJS 1.x: http://phantomjs.org/download.html
 
 Install CasperJS: http://docs.casperjs.org/en/latest/installation.html
 
