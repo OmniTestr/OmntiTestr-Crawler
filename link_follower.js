@@ -58,47 +58,52 @@ function crawlUrls(cookies, callback) {
 		getResources(url, cookies, function(error, data) {
 			if (error) throw error;
 			var links = [];
-			linkscrape(url, data.html, function(link_data, $) {
-				for(var i = 0; i < link_data.length; i++) {
-					var link = link_data[i].link;
-					if(link && isValidURL(link)) {
-						links.push(link);
+			if (data.html) {
+				linkscrape(url, data.html, function(link_data, $) {
+					for(var i = 0; i < link_data.length; i++) {
+						var link = link_data[i].link;
+						if(link && isValidURL(link)) {
+							links.push(link);
+						}
 					}
-				}
-				
-				visited_urls[url] = true;
-				for(var i = 0; i < data.resources.length; i++) {
-					resource = data.resources[i];
-					if(resources[resource.url] == undefined)
-						resources[resource.url] = {};
-					resources[resource.url].content_type = resource.content_type;
-					var parsed_url = parse(resource.url, true);
-					resources[resource.url].protocol = parsed_url.protocol;
-					resources[resource.url].query = parsed_url.query;
-					resources[resource.url].hash = parsed_url.hash;
-					if (resources[resource.url][resource.method] == undefined)
-						resources[resource.url][resource.method] = [];
-					resources[resource.url][resource.method].push(url);
-				}
-
-				for(var i = 0; i < links.length; i++) {
-					var link = links[i];
-					// Crop off a trailing '/'
-					if(link.length > 0 && link[link.length - 1] == '/')
-						link = link.substring(0, link.length - 1);
-					// If the link is not in the url_data, it has not been visited
-					// Also enacts a depth limit here
-					if(visited_urls[link] != true && !containsKeyPair(url_queue, 'url', link) && depth < max_depth && (n + url_queue.length) < max_links) {
-						url_queue.push({
-							url: link, 
-							depth: depth + 1 
-						});
+					
+					visited_urls[url] = true;
+					for(var i = 0; i < data.resources.length; i++) {
+						resource = data.resources[i];
+						if(resources[resource.url] == undefined)
+							resources[resource.url] = {};
+						resources[resource.url].content_type = resource.content_type;
+						var parsed_url = parse(resource.url, true);
+						resources[resource.url].protocol = parsed_url.protocol;
+						resources[resource.url].query = parsed_url.query;
+						resources[resource.url].hash = parsed_url.hash;
+						if (resources[resource.url][resource.method] == undefined)
+							resources[resource.url][resource.method] = [];
+						resources[resource.url][resource.method].push(url);
 					}
-				}
 
+					for(var i = 0; i < links.length; i++) {
+						var link = links[i];
+						// Crop off a trailing '/'
+						if(link.length > 0 && link[link.length - 1] == '/')
+							link = link.substring(0, link.length - 1);
+						// If the link is not in the url_data, it has not been visited
+						// Also enacts a depth limit here
+						if(visited_urls[link] != true && !containsKeyPair(url_queue, 'url', link) && depth < max_depth && (n + url_queue.length) < max_links) {
+							url_queue.push({
+								url: link, 
+								depth: depth + 1 
+							});
+						}
+					}
+
+					console.log('Crawled: ' + url + ' at depth: ' + depth + ' (' + url_queue.length + ' links left in queue, ' + n + ' links parsed)');
+					crawlUrls(cookies, callback);
+				});
+			} else {
 				console.log('Crawled: ' + url + ' at depth: ' + depth + ' (' + url_queue.length + ' links left in queue, ' + n + ' links parsed)');
 				crawlUrls(cookies, callback);
-			});
+			}
 		});
 	} else {
 		callback(null);

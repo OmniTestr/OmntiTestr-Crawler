@@ -35,19 +35,15 @@ if (args.length >= 2) {
 	// };
 
 	page.open(url, function(status) {
-		if(status == 'success') {
-			const output = {
-				status: status,
-				resources: resources,
-				html: page.content
-			};
-			var file = "" + Math.floor(Math.random() * 10000);
-			page.render('crawler_images/' + file + ".png");
-			console.log(JSON.stringify(output, undefined, 4));
-			phantom.exit();
-		} else {
-			phantom.exit(1);
-		}
+		const output = {
+			status: status,
+			resources: resources,
+			html: page.content
+		};
+		var file = "" + Math.floor(Math.random() * 10000);
+		page.render('crawler_images/' + file + ".png");
+		console.log(JSON.stringify(output, undefined, 4));
+		phantom.exit();
 	});
 } else {
 	phantom.exit(1);
